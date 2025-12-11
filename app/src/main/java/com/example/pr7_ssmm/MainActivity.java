@@ -2,6 +2,7 @@ package com.example.pr7_ssmm;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -99,16 +100,40 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     // Botones CRUD
     private void setupFirebaseButtons() {
-        // Botón GUARDAR
-        Button guardarButton = (Button) findViewById(R.id.guardarButton);
-        guardarButton.setOnClickListener(view -> {
-            // Obtener datos de campos
-            Map<String, Object> data = new HashMap<>();
-            data.put("address", direccionEditText.getText().toString());
-            data.put("phone", telefonoEditText.getText().toString());
-            db.collection("users").document(email).set(data);
-            Toast.makeText(this, "Guardado", Toast.LENGTH_SHORT).show();
+        // Botón ACTUALIZAR (Update por teléfono)
+        Button updateButton = (Button) findViewById(R.id.guardarButton);
+        updateButton.setOnClickListener(view -> {
+            String telefono = telefonoEditText.getText().toString();
+            if (telefono.isEmpty()) {
+                Toast.makeText(this, "Introduce teléfono para actualizar", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // 1. BUSCAR si el teléfono existe
+            db.collection("users")
+                    .whereEqualTo("phone", telefono)
+                    .get()
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            if (!task.getResult().isEmpty()) {
+                                // 2. EXISTE → OBTENER ID y ACTUALIZAR
+                                String docId = task.getResult().getDocuments().get(0).getId();
+
+                                Map<String, Object> data = new HashMap<>();
+                                data.put("address", direccionEditText.getText().toString());
+                                data.put("phone", telefonoEditText.getText().toString());
+
+                                db.collection("users").document(docId).set(data);
+                                Toast.makeText(this, "Cliente actualizado", Toast.LENGTH_SHORT).show();
+                            } else {
+                                Toast.makeText(this, "Teléfono NO existe", Toast.LENGTH_SHORT).show();
+                            }
+                        } else {
+                            Toast.makeText(this, "Error al buscar", Toast.LENGTH_SHORT).show();
+                        }
+                    });
         });
+
 
         // Botón Nueva (Create)
         Button nuevaButton = (Button) findViewById(R.id.nuevaButtom);
@@ -162,16 +187,38 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 
 
-        // Botón RECUPERAR (Read)
+        // Botón RECUPERAR (Read por teléfono)
         Button recuperarButton = (Button) findViewById(R.id.recuperarButton);
         recuperarButton.setOnClickListener(view -> {
-            // Recuperar datos Firestore
-            db.collection("users").document(email).get()
-                    .addOnSuccessListener(documentSnapshot -> {
-                        Map<String, Object> data = documentSnapshot.getData();
-                        if (data != null) {
-                            direccionEditText.setText(data.get("address").toString());
-                            telefonoEditText.setText(data.get("phone").toString());
+
+            String telefono = telefonoEditText.getText().toString();
+            if (telefono.isEmpty()) {
+                Toast.makeText(this, "Introduce teléfono para buscar", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // Buscar documentos donde el campo "phone" == teléfono introducido
+            db.collection("users")
+                    .whereEqualTo("phone", telefono)
+                    .get()
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            if (!task.getResult().isEmpty()) {
+                                // Tomamos el primer documento que coincida
+                                Map<String, Object> data = task.getResult()
+                                        .getDocuments()
+                                        .get(0)
+                                        .getData();
+
+                                if (data != null) {
+                                    direccionEditText.setText(data.get("address").toString());
+                                    telefonoEditText.setText(data.get("phone").toString());
+                                }
+                            } else {
+                                Toast.makeText(this, "No existe ese teléfono", Toast.LENGTH_SHORT).show();
+                            }
+                        } else {
+                            Toast.makeText(this, "Error al buscar", Toast.LENGTH_SHORT).show();
                         }
                     });
 
@@ -186,14 +233,49 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }).addOnFailureListener(e -> Log.e("Storage", e.getMessage()));
         });
 
-        // Botón BORRAR
+
+
+        // Botón BORRAR por teléfono
         Button eliminarButton = (Button) findViewById(R.id.eliminarButton);
         eliminarButton.setOnClickListener(view -> {
-            db.collection("users").document(email).delete();
-            direccionEditText.setText("");
-            telefonoEditText.setText("");
-            Toast.makeText(this, "Borrado", Toast.LENGTH_SHORT).show();
+            String telefono = telefonoEditText.getText().toString();
+            if (telefono.isEmpty()) {
+                Toast.makeText(this, "Introduce teléfono para borrar", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // Buscar documento por teléfono
+            db.collection("users")
+                    .whereEqualTo("phone", telefono)
+                    .get()
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            if (!task.getResult().isEmpty()) {
+                                // OBTENER ID del documento (NO los datos)
+                                String docId = task.getResult()
+                                        .getDocuments()
+                                        .get(0)
+                                        .getId();  // ← AQUÍ está el ID
+
+                                // BORRAR por ID
+                                db.collection("users").document(docId).delete();
+                                Toast.makeText(this, "Borrado correctamente", Toast.LENGTH_SHORT).show();
+                            } else {
+                                Toast.makeText(this, "No existe ese teléfono", Toast.LENGTH_SHORT).show();
+                            }
+                        } else {
+                            Toast.makeText(this, "Error al buscar", Toast.LENGTH_SHORT).show();
+                        }
+                    });
         });
+
+
+        Button botonReadEverything = findViewById(R.id.getEverything);
+        botonReadEverything.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, ListadoActivity.class);
+            startActivity(intent);
+        });
+
     }
 
     // MÉTODOS GPS

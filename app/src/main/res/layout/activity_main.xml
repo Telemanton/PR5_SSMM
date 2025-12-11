@@ -87,7 +87,18 @@
                 android:text="D"
                 android:layout_marginStart="8dp" />
         </LinearLayout>
+
+        <Button
+            android:id="@+id/getEverything"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="R everything" />
+
+
+
+
     </LinearLayout>
+
 
     <!-- Botón ubicación tiempo real (abajo derecha) -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
