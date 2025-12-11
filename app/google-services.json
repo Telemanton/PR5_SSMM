@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "180927506307",
+    "project_id": "p5-ssmm-f41aa",
+    "storage_bucket": "p5-ssmm-f41aa.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:180927506307:android:20757e3862d7bcb03978b6",
+        "android_client_info": {
+          "package_name": "com.example.p5_ssmm"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBxd0qCFnQctxiY8j2UqsRF4TV4laLxBwc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:180927506307:android:f58d323b5dd4fd6b3978b6",
+        "android_client_info": {
+          "package_name": "com.example.pr7_ssmm"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBxd0qCFnQctxiY8j2UqsRF4TV4laLxBwc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
